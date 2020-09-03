@@ -1,0 +1,10 @@
+{
+  "name": "among-us-proxy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "Nicolas Cisco",
+  "license": "MIT",
+  "dependencies": {
+    "websocket": "^1.0.32"
+  }
+}
