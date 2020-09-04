@@ -6,9 +6,7 @@
   "license": "MIT",
   "scripts": {
     "format": "prettier --write src/**/*.js",
-    "package": "nexe src/index.js",
-    "package:linux": "yarn package -t linux -o dist/among-us-proxy",
-    "package:windows": "yarn package -t windows -o dist/among-us-proxy.exe"
+    "package": "nexe src/index.js -t windows -o dist/among-us-proxy.exe"
   },
   "dependencies": {
     "websocket": "^1.0.32",
