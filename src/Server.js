@@ -20,7 +20,7 @@ class Server extends EventEmitter {
 
           if (first) {
             first = false;
-            rs();
+            rs(socket);
           }
 
           this.emit('message', msg, rinfo);
