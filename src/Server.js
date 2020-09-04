@@ -30,8 +30,13 @@ class Server extends EventEmitter {
   }
 
   sendDiscovery() {
-    const discovery = this.discovery = dgram.createSocket('udp4');
-    const message = Buffer.from(`0402${stringToHex(this.name)}7e4f70656e7e${stringToHex(`${this.usersInGame}`)}7e`, 'hex');
+    const discovery = (this.discovery = dgram.createSocket('udp4'));
+    const message = Buffer.from(
+      `0402${stringToHex(this.name)}7e4f70656e7e${stringToHex(
+        `${this.usersInGame}`
+      )}7e`,
+      'hex'
+    );
 
     discovery.bind(() => {
       // dicovery.setMulticastTTL(4);
@@ -46,10 +51,8 @@ class Server extends EventEmitter {
     const socket = await this.socket;
     return new Promise((rs, rj) => {
       socket.send(msg, this.rinfo.port, this.rinfo.address, err => {
-        if (err)
-          rj(err);
-        else
-          rs();
+        if (err) rj(err);
+        else rs();
       });
     });
   }
@@ -61,10 +64,8 @@ class Server extends EventEmitter {
     const socket = await this.socket;
     return new Promise((rs, rj) => {
       socket.close(err => {
-        if (err)
-          rj(err);
-        else
-          rs();
+        if (err) rj(err);
+        else rs();
       });
     });
   }

@@ -4,7 +4,14 @@
   "main": "index.js",
   "author": "Nicolas Cisco",
   "license": "MIT",
+  "scripts": {
+    "format": "prettier --write src/**/*.js"
+  },
   "dependencies": {
-    "websocket": "^1.0.32"
+    "websocket": "^1.0.32",
+    "yargs": "^15.4.1"
+  },
+  "devDependencies": {
+    "prettier": "^2.1.1"
   }
 }

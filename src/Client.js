@@ -20,10 +20,8 @@ class Client extends EventEmitter {
     const socket = await this.socket;
     return new Promise((rs, rj) => {
       socket.send(msg, AmongUs.serverPort, this.ip, err => {
-        if (err)
-          rj(err);
-        else
-          rs();
+        if (err) rj(err);
+        else rs();
       });
     });
   }
@@ -32,10 +30,8 @@ class Client extends EventEmitter {
     const socket = await this.socket;
     return new Promise((rs, rj) => {
       socket.close(err => {
-        if (err)
-          rj(err);
-        else
-          rs();
+        if (err) rj(err);
+        else rs();
       });
     });
   }
