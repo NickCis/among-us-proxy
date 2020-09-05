@@ -34,12 +34,12 @@ On the Guest side, it connects through WebSocket to the Host server. In addition
 
 ```
 $ npm install
-$ node src/index.js --help
-index.js <command>
+$ node src/main.js --help
+main.js <command>
 
 Commands:
-  index.js host [name]   Create a Host proxy
-  index.js guest <host>  Create a Guest proxy
+  main.js host [name]   Create a Host proxy
+  main.js guest <host>  Create a Guest proxy
 
 Options:
   --version  Show version number                                       [boolean]

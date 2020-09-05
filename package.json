@@ -1,13 +1,19 @@
 {
   "name": "among-us-proxy",
   "version": "1.0.1",
-  "main": "index.js",
+  "description": "Proxy of the local network protocol for the Among Us game",
+  "main": "src/index.js",
   "author": "Nicolas Cisco",
   "license": "MIT",
+  "repository": "https://github.com/nickcis/among-us-proxy",
   "scripts": {
     "format": "prettier --write src/**/*.js",
     "package": "nexe src/index.js -t windows -o dist/among-us-proxy.exe"
   },
+  "files": [
+    "src/*",
+    "README.md"
+  ],
   "dependencies": {
     "websocket": "^1.0.32",
     "yargs": "^15.4.1"
