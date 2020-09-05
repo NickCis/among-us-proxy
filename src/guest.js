@@ -45,8 +45,8 @@ function guest(host = 'ws://localhost:8080', console = global.console) {
 
   client.connect(host, WsProtocol);
 
-  promise.close = async () => {
-    await server.close();
+  promise.close = () => {
+    client.abort();
     resolve(0);
   };
 
