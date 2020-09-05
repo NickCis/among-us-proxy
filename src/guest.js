@@ -1,13 +1,15 @@
 const WebSocketClient = require('websocket').client;
 const { WsProtocol } = require('./constants');
 const Server = require('./Server');
+const deferred = require('./deferred');
 
-function guest(host = 'ws://localhost:8080') {
+function guest(host = 'ws://localhost:8080', console = global.console) {
+  const [promise, resolve] = deferred();
   const client = new WebSocketClient();
 
   client.on('connectFailed', error => {
     console.log('Connect Error:', error.toString());
-    process.exit(-1);
+    resolve(-1);
   });
 
   client.on('connect', conn => {
@@ -29,10 +31,10 @@ function guest(host = 'ws://localhost:8080') {
       }
     });
 
-    conn.on('close', () => {
+    conn.on('close', async () => {
       console.log('Closed connection');
-      server.close();
-      process.exit(-1);
+      await server.close();
+      resolve(-1);
     });
 
     server.on('message', msg => {
@@ -42,6 +44,13 @@ function guest(host = 'ws://localhost:8080') {
   });
 
   client.connect(host, WsProtocol);
+
+  promise.close = async () => {
+    await server.close();
+    resolve(0);
+  };
+
+  return promise;
 }
 
 module.exports = guest;

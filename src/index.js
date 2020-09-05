@@ -22,18 +22,21 @@ const argv = require('yargs')
   .help()
   .demandCommand(1, '').argv;
 
-function main(args) {
+async function main(args) {
   const [cmd] = argv._;
+  let code = 0;
 
   switch (cmd) {
     case 'host':
-      host(argv.port);
+      code = await host(argv.port);
       break;
 
     case 'guest':
-      guest(argv.host);
+      code = await guest(argv.host);
       break;
   }
+
+  process.exit(code);
 }
 
 main(argv);

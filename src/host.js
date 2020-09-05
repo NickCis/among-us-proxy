@@ -2,14 +2,23 @@ const http = require('http');
 const WebSocketServer = require('websocket').server;
 const Client = require('./Client');
 const { WsProtocol } = require('./constants');
+const deferred = require('./deferred');
 
-function host(port = 8080) {
+function host(port = 8080, console = global.console) {
+  const [promise, resolve] = deferred();
   const server = http.createServer((req, res) => {
     res.writeHead(404);
     res.end();
   });
 
-  server.listen(port, () => {
+  server.listen(port, error => {
+    if (error) {
+      console.log(e.toString());
+      resolve(-1);
+
+      return;
+    }
+
     console.log('Listening to', port);
   });
 
@@ -52,6 +61,12 @@ function host(port = 8080) {
       conn.sendBytes(msg);
     });
   });
+
+  promise.close = () => {
+    server.close(() => resolve(0));
+  };
+
+  return promise;
 }
 
 module.exports = host;
