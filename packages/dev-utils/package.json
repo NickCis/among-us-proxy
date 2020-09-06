@@ -1,0 +1,12 @@
+{
+  "name": "among-us-dev-utils",
+  "version": "1.0.1",
+  "description": "",
+  "main": "index.js",
+  "scripts": {},
+  "author": "Nicolas Cisco",
+  "license": "ISC",
+  "dependencies": {
+    "prettier": "^2.1.1"
+  }
+}
