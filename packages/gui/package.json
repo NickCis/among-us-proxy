@@ -7,7 +7,9 @@
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package --platform=win32",
-    "make": "cross-env NODE_ENV=production electron-forge make --platform=win32",
+    "download-ngrok": "node -e \"require('ngrok/download')(() => process.exit(0), { arch: 'win32' + require('os').arch() })\"",
+    "make:base": "cross-env NODE_ENV=production electron-forge make --platform=win32",
+    "make": "npm run download-ngrok && npm run make:base -- --platform=win32",
     "publish": "electron-forge publish",
     "format": "prettier --write 'src/**/*.js' 'webpack.*.js'"
   },
@@ -26,13 +28,13 @@
         {
           "name": "@electron-forge/maker-squirrel",
           "config": {
-            "setupIcon": "./res/icon.png"
+            "setupIcon": "./res/icon.ico"
           }
         },
         {
           "name": "@electron-forge/maker-zip",
           "platforms": [
-            "windows"
+            "win32"
           ]
         }
       ],
@@ -70,6 +72,7 @@
     "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
+    "@material-ui/lab": "^4.0.0-alpha.56",
     "among-us-proxy": "^1.1.1",
     "among-us-proxy-dev-utils": "^1.1.1",
     "babel-loader": "^8.1.0",
@@ -87,7 +90,6 @@
     "style-loader": "^1.2.1"
   },
   "dependencies": {
-    "@material-ui/lab": "^4.0.0-alpha.56",
     "electron-squirrel-startup": "^1.0.0"
   }
 }
