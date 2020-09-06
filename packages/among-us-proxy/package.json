@@ -1,6 +1,6 @@
 {
   "name": "among-us-proxy",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Proxy of the local network protocol for the Among Us game",
   "main": "src/index.js",
   "author": "Nicolas Cisco",
@@ -20,7 +20,7 @@
     "yargs": "^15.4.1"
   },
   "devDependencies": {
-    "among-us-proxy-dev-utils": "^1.1.0",
+    "among-us-proxy-dev-utils": "^1.1.1",
     "nexe": "^3.3.7"
   }
 }
