@@ -10,6 +10,9 @@ const config = {
   module: {
     rules: require('./webpack.rules'),
   },
+  resolve: {
+    modules: ['node_modules', '../../node_modules'],
+  },
 };
 
 if (process.platform === 'linux') {

@@ -7,7 +7,7 @@
   "license": "MIT",
   "repository": "https://github.com/nickcis/among-us-proxy",
   "scripts": {
-    "bootstrap": "lerna bootstrap",
+    "bootstrap": "lerna bootstrap --hoist",
     "format": "lerna run format",
     "lerna": "lerna"
   },

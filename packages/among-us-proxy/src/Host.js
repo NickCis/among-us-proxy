@@ -63,7 +63,9 @@ class Host extends EventEmitter {
     });
   }
 
-  close() {}
+  close() {
+    this.server.close();
+  }
 }
 
 module.exports = Host;

@@ -63,7 +63,7 @@ function Content() {
             Back
           </Button>
           <pre>
-            <code>{JSON.stringify(appState, null, 2)}</code>
+            <code>{appState.state.join('\n')}</code>
           </pre>
         </>
       );

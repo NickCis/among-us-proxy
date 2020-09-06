@@ -1,4 +1,11 @@
 {
+  "command": {
+    "bootstrap": {
+      "nohoist": [
+        "electron"
+      ]
+    }
+  },
   "packages": [
     "packages/*"
   ],

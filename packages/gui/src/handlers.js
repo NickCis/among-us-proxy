@@ -1,5 +1,5 @@
 import { ipcMain } from 'electron';
-import { host, guest } from 'among-us-proxy';
+import { Host, Guest } from 'among-us-proxy';
 import fetch from 'node-fetch';
 import ngrok from 'ngrok';
 import { GetAppState, RunHost, RunGuest, Close } from './methods';
@@ -23,33 +23,56 @@ ipcMain.on(GetAppState, event => {
 
 ipcMain.on(RunHost, async event => {
   close();
-  const state = (CurrentState = { code: 'host', state: 'localtunnel' });
+  const port = 8080;
+  const state = (CurrentState = {
+    code: 'host',
+    state: [`Starting ngrok (${port})...`],
+  });
   event.reply(GetAppState, CurrentState);
 
   const url = await ngrok.connect({
-    addr: 8080,
+    addr: port,
     binPath: path => path.replace('app.asar', 'app.asar.unpacked'),
   });
 
-  state.url = url;
-  state.state = 'server';
+  state.url = url.replace(/^http/, 'ws');
+  state.state[0] = `${state.state[0]} ✅`;
+  state.state[1] = `Exposed URL: ${state.url}`;
+  state.state[2] = `Starting websocker server (${port})...`;
   event.reply(GetAppState, CurrentState);
 
-  const h = host(8080);
+  const host = new Host(port);
+
+  host.on('listening', () => {
+    state.state[2] = `${state.state[2]} ✅`;
+    event.reply(GetAppState, CurrentState);
+  });
+
+  host.on('connection-open', ({ connection }) => {
+    state.state.push(`New connection: ${connection.remoteAddress}`);
+    event.reply(GetAppState, CurrentState);
+  });
+
+  host.on('connection-close', ({ connection }) => {
+    state.state.push(`Closed connection: ${connection.remoteAddress}`);
+    event.reply(GetAppState, CurrentState);
+  });
+
+  host.on('error', error => {
+    state.error = error.toString();
+    event.reply(GetAppState, CurrentState);
+  });
 
   instance = {
     close: () => {
       ngrok.kill();
-      h.close();
+      host.close();
     },
   };
 });
 
 ipcMain.on(RunGuest, async (event, host) => {
   close();
-  console.log('host', host);
-  const state = (CurrentState = { code: 'guest' });
-  event.reply(GetAppState, CurrentState);
   const [, , protocol, domain] = host.trim().match(/^((.*?):\/\/)?(.*)$/);
   const url = `${
     protocol && protocol.match(/^wss?$/)
@@ -59,7 +82,24 @@ ipcMain.on(RunGuest, async (event, host) => {
       : 'ws'
   }://${domain}`;
 
-  instance = guest(url);
+  const state = (CurrentState = {
+    code: 'guest',
+    state: [`Connection to: ${url}...`],
+    url,
+  });
+  event.reply(GetAppState, CurrentState);
+
+  const guest = (instance = new Guest(url));
+
+  guest.on('connect', () => {
+    state.state[0] = `${state.state[0]} ✅`;
+    event.reply(GetAppState, CurrentState);
+  });
+
+  guest.on('error', error => {
+    state.error = error.toString();
+    event.reply(GetAppState, CurrentState);
+  });
 });
 
 ipcMain.on(Close, event => {

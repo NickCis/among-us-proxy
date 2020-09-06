@@ -88,7 +88,7 @@ async function main(args) {
       const guest = new Guest(argv.host);
       console.log('Connecting to:', argv.host);
 
-      guest.on('connect', error => {
+      guest.on('connect', () => {
         console.log('connected');
       });
 
