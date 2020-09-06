@@ -1,6 +1,6 @@
 module.exports = {
-  host: require('./host'),
-  guest: require('./guest'),
+  Host: require('./Host'),
+  Guest: require('./Guest'),
   Client: require('./Client'),
   Server: require('./Server'),
 };
