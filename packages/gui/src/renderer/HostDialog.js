@@ -17,10 +17,10 @@ function HostDialog({ onSubmit, onClose, open }) {
           onSubmit(host);
         }}
       >
-        <DialogTitle id="form-dialog-title">Subscribe</DialogTitle>
+        <DialogTitle id="form-dialog-title">Host URL</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            To subscribe to connect, please enter the Host url.
+            To connect, please enter the Host url.
           </DialogContentText>
           <TextField
             value={host}

@@ -40,7 +40,7 @@ class Guest extends EventEmitter {
   }
 
   close() {
-    this.server.close();
+    if (this.server) this.server.close();
     this.client.abort();
   }
 }

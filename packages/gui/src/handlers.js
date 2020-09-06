@@ -85,7 +85,7 @@ ipcMain.on(RunGuest, async (event, host) => {
   const state = (CurrentState = {
     code: 'guest',
     state: [`Connection to: ${url}...`],
-    url,
+    // url,
   });
   event.reply(GetAppState, CurrentState);
 

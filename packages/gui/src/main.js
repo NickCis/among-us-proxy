@@ -1,5 +1,6 @@
-import { app, BrowserWindow } from 'electron';
 import path from 'path';
+import { app, BrowserWindow } from 'electron';
+import windowState from 'electron-window-state';
 import './handlers';
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -9,22 +10,36 @@ if (require('electron-squirrel-startup')) {
 }
 
 const createWindow = () => {
+  const mainWindowState = windowState({
+    defaultWidth: 1000,
+    defaultHeight: 800,
+  });
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
-    height: 600,
+    x: mainWindowState.x,
+    y: mainWindowState.y,
+    width: mainWindowState.width,
+    height: mainWindowState.height,
+    // frame: false,
+    // titleBarStyle: 'hidden',
+    autoHideMenuBar: true,
     webPreferences: {
       contextIsolation: true,
       enableRemoteModule: false,
       preload: MAIN_WINDOW_PRELOAD_WEBPACK_ENTRY,
+      icon: path.resolve('./res/icon.ico'),
     },
   });
+
+  mainWindowState.manage(mainWindow);
 
   // and load the index.html of the app.
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
 
   // Open the DevTools.
-  mainWindow.webContents.openDevTools();
+  if (process.env.NODE_ENV !== 'production')
+    mainWindow.webContents.openDevTools();
 };
 
 // This method will be called when Electron has finished

@@ -16,10 +16,8 @@ const useStyles = makeStyles(theme => ({
     height: '100vh',
     overflow: 'auto',
   },
-  appBarSpacer: theme.mixins.toolbar,
   container: {
-    paddingTop: theme.spacing(4),
-    paddingBottom: theme.spacing(4),
+    paddingTop: theme.spacing(6),
   },
 }));
 
@@ -29,11 +27,11 @@ function App() {
   return (
     <>
       <CssBaseline />
-      <AppBar>
-        <Toolbar>
+      <AppBar elevation={0}>
+        <Toolbar variant="dense">
           <Typography
             component="h1"
-            variant="h6"
+            variant="subtitle1"
             color="inherit"
             className={classes.title}
             noWrap
@@ -43,8 +41,7 @@ function App() {
         </Toolbar>
       </AppBar>
       <main className={classes.content}>
-        <div className={classes.appBarSpacer} />
-        <Container maxWidth="lg" className={classes.container}>
+        <Container maxWidth="sm" className={classes.container}>
           <Content />
         </Container>
       </main>

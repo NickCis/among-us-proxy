@@ -3,7 +3,8 @@
     "bootstrap": {
       "nohoist": [
         "electron",
-        "nexe"
+        "nexe",
+        "ngrok"
       ]
     }
   },
