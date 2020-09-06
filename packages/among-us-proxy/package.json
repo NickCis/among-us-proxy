@@ -19,7 +19,7 @@
     "yargs": "^15.4.1"
   },
   "devDependencies": {
-    "among-us-dev-utils": "^1.0.1",
+    "among-us-proxy-dev-utils": "^1.0.1",
     "nexe": "^3.3.7"
   }
 }

@@ -1,0 +1,97 @@
+{
+  "name": "among-us-proxy-gui",
+  "productName": "among-us-proxy-gui",
+  "version": "1.0.1",
+  "description": "My Electron application description",
+  "main": ".webpack/main",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make --platform=win32",
+    "publish": "electron-forge publish",
+    "format": "prettier --write 'src/**/*.js' 'webpack.*.js'"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Nicolas Cisco",
+    "email": "ncis20@gmail.com"
+  },
+  "license": "MIT",
+  "config": {
+    "forge": {
+      "packagerConfig": {},
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "among_us_proxy_gui"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {}
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {}
+        }
+      ],
+      "plugins": [
+        [
+          "@electron-forge/plugin-webpack",
+          {
+            "mainConfig": "./webpack.main.config.js",
+            "renderer": {
+              "config": "./webpack.renderer.config.js",
+              "entryPoints": [
+                {
+                  "html": "./src/index.html",
+                  "js": "./src/renderer",
+                  "preload": {
+                    "js": "./src/preload"
+                  },
+                  "name": "main_window"
+                }
+              ]
+            }
+          }
+        ]
+      ]
+    }
+  },
+  "devDependencies": {
+    "@babel/core": "^7.11.6",
+    "@babel/preset-env": "^7.11.5",
+    "@babel/preset-react": "^7.10.4",
+    "@electron-forge/cli": "6.0.0-beta.53",
+    "@electron-forge/maker-deb": "6.0.0-beta.53",
+    "@electron-forge/maker-rpm": "6.0.0-beta.53",
+    "@electron-forge/maker-squirrel": "6.0.0-beta.53",
+    "@electron-forge/maker-zip": "6.0.0-beta.53",
+    "@electron-forge/plugin-webpack": "6.0.0-beta.53",
+    "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
+    "@material-ui/core": "^4.11.0",
+    "among-us-proxy": "^1.0.1",
+    "among-us-proxy-dev-utils": "^1.0.1",
+    "babel-loader": "^8.1.0",
+    "css-loader": "^4.2.1",
+    "electron": "10.1.1",
+    "file-loader": "^6.1.0",
+    "fontsource-roboto": "^3.0.3",
+    "ngrok": "^3.3.0",
+    "node-fetch": "^2.6.0",
+    "node-loader": "^1.0.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "style-loader": "^1.2.1"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.0"
+  }
+}
