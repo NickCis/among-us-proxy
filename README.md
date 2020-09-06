@@ -16,34 +16,9 @@ On the Host side, it spins up a WebSocket server which Guests will connect to. W
 
 On the Guest side, it connects through WebSocket to the Host server. In addition, it fakes the broadcast udp message discovery to make the game believe that there is a match on the local network. In order to fake an Among Us server, it listens to the local `22023` port. Everything that is read through this port is forwarded (through WebSocket) to the Host. Everything that is received from the WebSocket is forwarded to the game through the udp port.
 
-## How to use it
 
-1. Download last release from [releases](https://github.com/NickCis/among-us-proxy/releases).
-2. Unzip the file
-3. Open `powershell` and go to the folder where the binary was uncompressed
-4. If you are going to be:
-  - Host:
-    1. Create a match on the LAN section
-    2. On the powershell run `among-us-proxy.exe host`
-    3. Guests should connect to `ws://<your ip>:8080` (You'll probably want to use [ngrok](https://ngrok.com/) or [localtunnel](https://localtunnel.me/) to expose the `8080` port to the world.
-  - Guest:
-    1. On the powershell run `among-us-proxy-exe guest <host>`
-    2. On the game, you'll find a _Proxy_ game on the Lan section, you should be able to connect to it.
+This project contains a:
+- [Command Line Interface](./packges/among-us-proxy)
+- [Graphical User Interface](./packges/gui)
 
-## Use from source
-
-```
-$ npm install
-$ node src/main.js --help
-main.js <command>
-
-Commands:
-  main.js host [name]   Create a Host proxy
-  main.js guest <host>  Create a Guest proxy
-
-Options:
-  --version  Show version number                                       [boolean]
-  --help     Show help                                                 [boolean]
-```
-
-(And follow the _How to use it_ explanation)
+Both packages can be downloaded from the [releases section](./releases)
