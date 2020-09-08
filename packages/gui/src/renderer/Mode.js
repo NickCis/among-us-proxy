@@ -31,7 +31,7 @@ function Mode({ appState }) {
   return (
     <Paper className={classes.paper}>
       <List className={classes.list} dense>
-        <ListItem button onClick={() => ipcRenderer.send(RunHost)}>
+        <ListItem>
           <ListItemIcon>
             <IconButton edge="start" onClick={() => ipcRenderer.send(Close)}>
               <ArrowBackIcon />

@@ -1,6 +1,6 @@
 # Among Us Proxy
 
-[See project page]('../../README.md')
+[See project page]('https://github.com/nickcis/among-us-proxy/README.md')
 
 ## How to use it
 
