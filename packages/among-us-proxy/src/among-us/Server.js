@@ -1,7 +1,7 @@
 const dgram = require('dgram');
 const EventEmitter = require('events');
-const { AmongUs } = require('./constants');
-const { stringToHex } = require('./utils');
+const { AmongUs } = require('../constants');
+const { stringToHex } = require('../utils');
 
 class Server extends EventEmitter {
   constructor(name = 'Proxy', ip = '127.0.0.1', usersInGame = 1) {
@@ -31,6 +31,7 @@ class Server extends EventEmitter {
 
   sendDiscovery() {
     const discovery = (this.discovery = dgram.createSocket('udp4'));
+    // numberToHex(4) + numberToHex(2) + stringToHex(name) + stringToHex(`~Open~${users}~`)
     const message = Buffer.from(
       `0402${stringToHex(this.name)}7e4f70656e7e${stringToHex(
         `${this.usersInGame}`

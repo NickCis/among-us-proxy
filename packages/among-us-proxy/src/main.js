@@ -11,10 +11,13 @@ const argv = require('yargs')
       .positional('name', {
         describe: 'Match name',
       })
-      .option('port', {
+      .option('protocol', {
         alias: 'p',
+        describe: 'Procotol (ws or spj)',
+        default: 'ws',
+      })
+      .option('port', {
         describe: 'Websocket listening port',
-        default: 8080,
         number: true,
       });
   })
@@ -31,10 +34,12 @@ async function main(args) {
 
   switch (cmd) {
     case 'host': {
-      const host = new Host(argv.port);
+      const host = new Host(args.protocol, {
+        ...(argv.port ? { port: argv.port } : undefined),
+      });
 
-      host.on('listening', ({ port }) => {
-        console.log('Listening to port:', port);
+      host.on('listening', id => {
+        console.log('Listening to:', id);
       });
 
       host.on('error', error => {
@@ -42,7 +47,7 @@ async function main(args) {
         process.exit(-1);
       });
 
-      host.on('connection-open', ({ connection }) => {
+      host.on('connection-open', connection => {
         console.log('[', connection.remoteAddress, ']: Connected');
       });
 
@@ -63,20 +68,12 @@ async function main(args) {
               break;
 
             case 'socket':
-              if (msg.type === 'binary')
-                console.log(
-                  '[',
-                  connection.remoteAddress,
-                  '] ->',
-                  msg.binaryData.toString('hex')
-                );
-              else
-                console.log(
-                  '[',
-                  connection.remoteAddress,
-                  '] ->',
-                  msg.utf8Data.toString()
-                );
+              console.log(
+                '[',
+                connection.remoteAddress,
+                '] ->',
+                msg.toString('hex')
+              );
               break;
           }
         });
@@ -105,9 +102,7 @@ async function main(args) {
               break;
 
             case 'socket':
-              if (msg.type === 'binary')
-                console.log('->', msg.binaryData.toString('hex'));
-              else console.log('->', msg.utf8Data.toString());
+              console.log('->', msg.toString('hex'));
               break;
           }
         });

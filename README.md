@@ -77,3 +77,21 @@ There you should see a _Proxy_ game on the _Available Games_ list. Double click 
 ## Development
 
 The project uses `npm` and [`lerna`](https://github.com/lerna/lerna).
+
+Install dependencies:
+
+```
+$ npm run bootstrap
+```
+
+Code formatting:
+
+```
+$ npm run format
+```
+
+Packaging:
+
+```
+$ npm run lerna -- make
+```

@@ -41,14 +41,14 @@ ipcMain.on(RunHost, async event => {
   state.state[2] = `Starting websocker server (${port})...`;
   event.reply(GetAppState, CurrentState);
 
-  const host = new Host(port);
+  const host = new Host('ws', { port });
 
   host.on('listening', () => {
     state.state[2] = `${state.state[2]} ✅`;
     event.reply(GetAppState, CurrentState);
   });
 
-  host.on('connection-open', ({ connection }) => {
+  host.on('connection-open', connection => {
     state.state.push(`New connection: ${connection.remoteAddress}`);
     event.reply(GetAppState, CurrentState);
   });

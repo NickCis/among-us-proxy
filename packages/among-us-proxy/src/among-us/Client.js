@@ -1,6 +1,6 @@
 const dgram = require('dgram');
 const EventEmitter = require('events');
-const { AmongUs } = require('./constants');
+const { AmongUs } = require('../constants');
 
 class Client extends EventEmitter {
   constructor(ip = '127.0.0.1') {

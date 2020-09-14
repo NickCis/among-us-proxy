@@ -1,37 +1,20 @@
 const EventEmitter = require('events');
-const http = require('http');
-const WebSocketServer = require('websocket').server;
-const Client = require('./Client');
-const { WsProtocol } = require('./constants');
+const server = require('./tunnel/server');
+const Client = require('./among-us/Client');
 
 class Host extends EventEmitter {
-  constructor(port = 8080) {
+  constructor(protocol = 'ws', opts) {
     super();
-    this.port = port;
+    this.server = server(protocol, opts);
+    this.server.on('listening', id => this.emit('listening', id));
+    this.server.on('error', error => this.emit('error', error));
+    this.server.on('connection', conn => {
+      this.emit('connection-open', conn);
+      conn.on('error', error =>
+        this.emit('connection-error', { connection: conn, error })
+      );
 
-    const server = (this.server = http.createServer((req, res) => {
-      res.writeHead(404);
-      res.end();
-    }));
-
-    server.listen(port, error => {
-      if (error) {
-        this.emit('error', error);
-        return;
-      }
-
-      this.emit('listening', { port });
-    });
-
-    const wsServer = (this.ws = new WebSocketServer({
-      httpServer: server,
-      autoAcceptConnections: false,
-    }));
-
-    wsServer.on('request', req => {
-      const conn = req.accept(WsProtocol, req.origin);
       const client = new Client();
-      this.emit('connection-open', { request: req, connection: conn });
 
       conn.on('message', msg => {
         this.emit('message', {
@@ -40,15 +23,16 @@ class Host extends EventEmitter {
           message: msg,
         });
 
-        if (msg.type === 'binary') client.send(msg.binaryData);
+        client.send(msg);
       });
 
-      conn.on('close', (code, desc) => {
+      conn.on('close', ({ code, reason }) => {
         this.emit('connection-close', {
           connection: conn,
           code,
-          description: desc,
+          description: reason,
         });
+
         client.close();
       });
 
@@ -58,7 +42,7 @@ class Host extends EventEmitter {
           connection: conn,
           message: msg,
         });
-        conn.sendBytes(msg);
+        conn.send(msg);
       });
     });
   }
