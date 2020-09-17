@@ -19,6 +19,7 @@
     "email": "ncis20@gmail.com"
   },
   "license": "MIT",
+  "repository": "https://github.com/nickcis/among-us-proxy",
   "config": {
     "forge": {
       "packagerConfig": {
@@ -36,6 +37,18 @@
           "platforms": [
             "win32"
           ]
+        }
+      ],
+      "publishers": [
+        {
+          "name": "@electron-forge/publisher-github",
+          "config": {
+            "repository": {
+              "owner": "nickcis",
+              "name": "among-us-proxy"
+            },
+            "prerelease": true
+          }
         }
       ],
       "plugins": [
@@ -69,6 +82,7 @@
     "@electron-forge/maker-squirrel": "6.0.0-beta.53",
     "@electron-forge/maker-zip": "6.0.0-beta.53",
     "@electron-forge/plugin-webpack": "6.0.0-beta.53",
+    "@electron-forge/publisher-github": "^6.0.0-beta.53",
     "@marshallofsound/webpack-asset-relocator-loader": "^0.5.0",
     "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
@@ -87,7 +101,8 @@
     "node-loader": "^1.0.1",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
-    "style-loader": "^1.2.1"
+    "style-loader": "^1.2.1",
+    "update-electron-app": "^1.5.0"
   },
   "dependencies": {
     "electron-squirrel-startup": "^1.0.0"

@@ -30,11 +30,11 @@ First of all, we have to download the proxy application. This can be done on the
 
 When you open the proxy (if you've download the zip it'll be the file named `among-us-proxy-gui.exe`) you'll see the following window:
 
-![](img/home.png)
+![](img/start.png)
 
 There are two types of users:
 - Host: the person who will create the game on Among Us
-- Guest: the people who will connect oto an available game
+- Guest: the people who will connect to an available game
 
 ### Host
 
@@ -42,7 +42,7 @@ The Host should first click the _Host_ option under the proxy. After a few secon
 
 ![](img/host.png)
 
-You should take note of the url on the green screen (on the example `wss://401c05a16801.ngrok.io`) because it will be the url you will send to your friends. But, before doing that you should create the game on among us.
+You should take note of the url on the green screen (on the example `wss://f6062ab98438.ngrok.io`) because it will be the url you will send to your friends. But, before doing that you should create the game on among us.
 
 In order to create the game. First open Among Us. On the main screen:
 
@@ -62,7 +62,7 @@ The Guest should first click the _Guest_ option under the proxy. A popup will ap
 
 On that input, the url that the host has generated has to be written. After pasting the url, you should click on _Connect_. You'll see the following screen:
 
-![](img/guest-connect.png)
+![](img/guest-connected.png)
 
 Now you can connect to the game. First open Among Us. On the main screen:
 
@@ -70,7 +70,7 @@ Now you can connect to the game. First open Among Us. On the main screen:
 
 Select the option _Local_. You'll see the following screen:
 
-![](img/among-local.png)
+![](img/among-local-guest.png)
 
 There you should see a _Proxy_ game on the _Available Games_ list. Double click in order to connect.
 
@@ -81,6 +81,7 @@ The project uses `npm` and [`lerna`](https://github.com/lerna/lerna).
 Install dependencies:
 
 ```
+$ npm install
 $ npm run bootstrap
 ```
 

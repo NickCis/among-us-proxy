@@ -5,7 +5,8 @@ module.exports = [
     use: 'node-loader',
   },
   {
-    test: /\.(m?js|node)$/,
+    // test: /\.(m?js|node)$/,
+    test: /\.(m?js)$/,
     parser: { amd: false },
     use: {
       loader: '@marshallofsound/webpack-asset-relocator-loader',
