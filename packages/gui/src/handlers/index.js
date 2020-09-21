@@ -2,9 +2,11 @@ import { ipcMain } from 'electron';
 import { Host, Guest } from 'among-us-proxy';
 import fetch from 'node-fetch';
 import ngrok from 'ngrok';
-import { GetAppState, RunHost, RunGuest, Close } from './methods';
+import { GetAppState, RunHost, RunGuest, Close, RemoveGuest } from '../methods';
+import ConnectionJar from './ConnectionJar';
 
 let CurrentState = { code: 'none' };
+let Connections;
 
 // https://www.electronjs.org/docs/api/ipc-main
 
@@ -23,10 +25,12 @@ ipcMain.on(GetAppState, event => {
 
 ipcMain.on(RunHost, async event => {
   close();
+  Connections = new ConnectionJar();
   const port = 8080;
   const state = (CurrentState = {
     code: 'host',
     state: [`Starting ngrok (${port})...`],
+    connections: [],
   });
   event.reply(GetAppState, CurrentState);
 
@@ -49,12 +53,17 @@ ipcMain.on(RunHost, async event => {
   });
 
   host.on('connection-open', connection => {
+    const key = Connections.add(connection);
     state.state.push(`New connection: ${connection.remoteAddress}`);
+    state.connections = state.connections.filter(c => c.key !== key);
+    state.connections.push({ remoteAddress: connection.remoteAddress, key });
     event.reply(GetAppState, CurrentState);
   });
 
   host.on('connection-close', ({ connection }) => {
+    const key = Connections.delete(connection);
     state.state.push(`Closed connection: ${connection.remoteAddress}`);
+    state.connections = state.connections.filter(c => c.key !== key);
     event.reply(GetAppState, CurrentState);
   });
 
@@ -71,13 +80,25 @@ ipcMain.on(RunHost, async event => {
   };
 });
 
+ipcMain.on(RemoveGuest, (event, key) => {
+  const connection = Connections.get(key);
+  connection.close();
+  Connections.delete(connection);
+  CurrentState.state.push(`Removed: ${connection.remoteAddress}`);
+  CurrentState.connections = CurrentState.connections.filter(c => c.key !== key);
+  event.reply(GetAppState, CurrentState);
+});
+
 ipcMain.on(RunGuest, async (event, host) => {
   close();
   const [, , protocol, domain] = host.trim().match(/^((.*?):\/\/)?(.*)$/);
+  const proto = protocol ? protocol.toLowerCase() : '';
   const url = `${
-    protocol && protocol.match(/^wss?$/)
-      ? protocol
-      : protocol === 'https'
+    proto.match(/^wss?$/)
+      ? proto
+      : proto === 'pj'
+      ? proto
+      : proto === 'https'
       ? 'wss'
       : 'ws'
   }://${domain}`;

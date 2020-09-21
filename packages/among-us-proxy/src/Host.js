@@ -21,6 +21,7 @@ class Host extends EventEmitter {
           origin: 'socket',
           connection: conn,
           message: msg,
+          client,
         });
 
         client.send(msg);
@@ -41,6 +42,7 @@ class Host extends EventEmitter {
           origin: 'game',
           connection: conn,
           message: msg,
+          client,
         });
         conn.send(msg);
       });

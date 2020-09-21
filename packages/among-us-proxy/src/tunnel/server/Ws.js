@@ -15,9 +15,11 @@ class Connection extends EventEmitter {
   }
 
   get remoteAddress() {
+    const port = this.req.socket.remotePort;
+
     if (this.req.headers['x-forwarded-for'])
-      return this.req.headers['x-forwarded-for'].split(/\s*,\s*/)[0];
-    return this.req.socket.remoteAddress;
+      return `${this.req.headers['x-forwarded-for'].split(/\s*,\s*/)[0]}:${port}`;
+    return `${this.req.socket.remoteAddress}:${port}`;
   }
 
   send(msg) {
