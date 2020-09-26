@@ -10,7 +10,7 @@ const Colors = {
   8: 'purple',
   9: 'brown',
   10: 'cyan',
-  11: 'ligh-green',
+  11: 'light-green',
 };
 
 function getLengthedString(buffer, offset) {
@@ -24,55 +24,139 @@ function getLengthedString(buffer, offset) {
   return text;
 }
 
+function getLengthedBuffer(buffer, offset) {
+  const length = buffer[offset];
+  const head = buffer.readUInt16BE(offset + 1);
+  const start = offset + 1 + 2;
+  const end = start + length;
+
+  return {
+    length,
+    head,
+    start,
+    end,
+  };
+}
+
 function parse(buffer) {
   const code = buffer[0];
 
   switch (code) {
-    case 0x01: {
-      const count = buffer.readUInt16BE(1);
-      const length = buffer[3];
-      // idk why 6
-      if (buffer.length - 6 - length !== 0)
-        return new Error(`Invalid buffer. blength: ${buffer.length} length: ${length}`);
-
-      // 0x00 05
-      if (buffer.readUInt16BE(4) !== 0x0005) break;
-
-      // 0x20 00
-      if (buffer.readUInt16BE(6) !== 0x2000) break;
-
-      const subcode = buffer[10];
-      const user = buffer[13];
-
-      if (subcode === 0x03) {
-        // User Update
-        const name = getLengthedString(buffer, 24);
-        const color = Colors[buffer[29]];
-        const hat = buffer[30];
-        const pet = buffer[31];
-        const skin = buffer[32];
-
-        return {
-          type: 'player-look',
-          name,
-          count,
-          color,
-          hat,
-          pet,
-          skin,
-        };
-      } else if (subcode === 0x04) {
-        // Reply to user update
-      } else if (subcode >= 0x05) {
-        // message
-      }
-    }
-
     case 0x00: {
       switch (buffer[1]) {
         case 0x12:
           // Movement
           break;
+      }
+
+      break;
+    }
+
+    case 0x01: {
+      const count = buffer.readUInt16BE(1);
+      const length = buffer[3];
+      // idk why 6
+      if (buffer.length - 6 - length !== 0)
+        return new Error(
+          `Invalid buffer. blength: ${buffer.length} length: ${length}`
+        );
+
+      const t = buffer.readUInt16BE(4);
+
+      switch (t) {
+        case 0x0005: {
+          // XXX: Always? idk
+          const pre = buffer.readUInt32BE(6);
+          if (pre !== 0x20000000)
+            return new Error(`unknown init: 0x${pre.toString(16)}`);
+
+          let acc;
+
+          for (let i = 10; i < buffer.length; ) {
+            const read = getLengthedBuffer(buffer, i);
+
+            if (read.head !== 0x0002)
+              return new Error(`unknown head: 0x${read.head.toString(16)}`);
+
+            // const user = buffer[read.start];
+            const opt = buffer[read.start + 1];
+            switch (opt) {
+              case 0x1e:
+                if (!acc) acc = {};
+
+                // Player info
+                acc.type = 'player-look';
+
+                const start = read.start + 5;
+                const name = (acc.name = getLengthedString(buffer, start));
+                acc.color = Colors[buffer[start + 1 + name.length]];
+                acc.hat = buffer[start + 1 + name.length + 1];
+                acc.pet = buffer[start + 1 + name.length + 2];
+                acc.skin = buffer[start + 1 + name.length + 3];
+
+                break;
+
+              case 0x08:
+                // Player id
+                if (!acc) acc = {};
+                acc.user = buffer[read.start];
+                break;
+
+              case 0x09:
+                // hat change
+                if (!acc) acc = {};
+                acc.type = 'hat-change';
+                acc.user = buffer[read.start];
+                acc.skin = buffer[read.start + 2];
+                break;
+
+              case 0x0a:
+                // skin change
+                if (!acc) acc = {};
+                acc.type = 'skin-change';
+                acc.user = buffer[read.start];
+                acc.skin = buffer[read.start + 2];
+                break;
+
+              case 0x0d:
+                // Player message
+                if (!acc) acc = {};
+                acc.user = buffer[read.start];
+                acc.message = getLengthedString(buffer, read.start + 2);
+                break;
+
+              default:
+                console.error('Unknown opt:', opt.toString(16));
+                break;
+            }
+
+            i = read.end;
+          }
+
+          return acc;
+        }
+
+        case 0x0006: {
+          if (buffer[6] !== 0x20) break;
+          const subcode = buffer.readUInt32BE(7);
+
+          if (subcode !== 0x0e) break;
+
+          // Change player color
+          const user = buffer[14];
+          const color = Colors[buffer[16]];
+
+          return {
+            type: 'player-color',
+            color,
+            user,
+          };
+        }
+
+        case 0x0001:
+        case 0x0007:
+        default:
+          return new Error(`implement t: ${t}`);
       }
 
       break;
@@ -99,6 +183,9 @@ function parse(buffer) {
       };
     }
 
+    case 0x09:
+      return { type: 'close' };
+
     case 0x0a:
     case 0x0c: {
       // Ping: 0axxxxff
@@ -108,9 +195,6 @@ function parse(buffer) {
         count,
       };
     }
-
-    case 0x09:
-      return { type: 'close' };
   }
 
   return undefined;

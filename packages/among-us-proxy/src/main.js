@@ -2,22 +2,6 @@ const Host = require('./Host');
 const Guest = require('./Guest');
 const parse = require('./parse');
 
-function printer({ length = 75, separator = '|' } = {}) {
-  return (head, ...data) => {
-    const maxLength = Math.max(...data.map(d => d.length));
-    for (let i = 0; i < maxLength; i += length) {
-      console.log(
-        i ? ''.padEnd(head.length) : head,
-        ...data.reduce((acc, element, ii) => {
-          if (ii) acc.push('|');
-          acc.push(element.substring(i, i + length).padEnd(length));
-          return acc;
-        }, [])
-      );
-    }
-  };
-}
-
 function bufferToString(buffer) {
   let str = '';
 
@@ -30,6 +14,24 @@ function bufferToString(buffer) {
   }
 
   return str;
+}
+
+function print(head, buffer, { length = 50, separator = '|' } = {}) {
+  const hex = buffer.toString('hex');
+  const str = bufferToString(buffer);
+
+  for (let i = 0; i < hex.length; i += length) {
+    console.log(
+      i ? ''.padEnd(head.length) : head,
+      hex
+        .substring(i, i + length)
+        .replace(/(.{2})/g, '$1 ')
+        .trim()
+        .padEnd((length * 3) / 2 - 1),
+      separator,
+      str.substring(i / 2, (i + length) / 2)
+    );
+  }
 }
 
 const argv = require('yargs')
@@ -59,8 +61,6 @@ const argv = require('yargs')
   })
   .help()
   .demandCommand(1, '').argv;
-
-const print = printer();
 
 async function main(args) {
   const [cmd] = argv._;
@@ -133,14 +133,19 @@ async function main(args) {
           if (parsed && parsed.type === 'ping') return;
           switch (origin) {
             case 'game':
-              print('<-', msg.toString('hex'), bufferToString(msg));
+              print('<-', msg);
               break;
 
             case 'socket':
-              print('->', msg.toString('hex'), bufferToString(msg));
+              print('->', msg);
               break;
           }
-          if (parsed) console.log(JSON.stringify(parsed));
+          if (parsed)
+            console.log(
+              parsed instanceof Error
+                ? parsed.toString()
+                : JSON.stringify(parsed)
+            );
         });
       }
       break;
