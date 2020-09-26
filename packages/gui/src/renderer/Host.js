@@ -11,7 +11,6 @@ import Divider from '@material-ui/core/Divider';
 import InboxIcon from '@material-ui/icons/Inbox';
 import DeleteIcon from '@material-ui/icons/Delete';
 
-
 import MuiAccordion from '@material-ui/core/Accordion';
 import MuiAccordionSummary from '@material-ui/core/AccordionSummary';
 import MuiAccordionDetails from '@material-ui/core/AccordionDetails';
@@ -30,7 +29,7 @@ const Accordion = withStyles({
       margin: 'auto',
     },
   },
-  expanded: {}
+  expanded: {},
 })(MuiAccordion);
 
 const AccordionSummary = withStyles(theme => ({
@@ -75,22 +74,22 @@ function Host({ appState }) {
   return (
     <Frame onClick={() => ipcRenderer.send(Close)} primary="Host">
       <Alerts appState={appState} />
-      <Typography className={classes.title}>
-        Connected Users
-      </Typography>
+      <Typography className={classes.title}>Connected Users</Typography>
       <List>
         {appState.connections.map((conn, i) => (
           <React.Fragment key={conn.key}>
-            {!!i && (
-              <Divider />
-            )}
+            {!!i && <Divider />}
             <ListItem>
               <ListItemIcon>
                 <InboxIcon />
               </ListItemIcon>
               <ListItemText primary={conn.remoteAddress} />
               <ListItemSecondaryAction>
-                <IconButton edge="end" aria-label="delete" onClick={() => ipcRenderer.send(RemoveGuest, conn.key)}>
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={() => ipcRenderer.send(RemoveGuest, conn.key)}
+                >
                   <DeleteIcon />
                 </IconButton>
               </ListItemSecondaryAction>
@@ -99,9 +98,7 @@ function Host({ appState }) {
         ))}
       </List>
       <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMoreIcon />}
-        >
+        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography className={classes.expandTitle}>Log</Typography>
         </AccordionSummary>
         <AccordionDetails>

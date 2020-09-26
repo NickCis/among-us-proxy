@@ -1,5 +1,36 @@
 const Host = require('./Host');
 const Guest = require('./Guest');
+const parse = require('./parse');
+
+function printer({ length = 75, separator = '|' } = {}) {
+  return (head, ...data) => {
+    const maxLength = Math.max(...data.map(d => d.length));
+    for (let i = 0; i < maxLength; i += length) {
+      console.log(
+        i ? ''.padEnd(head.length) : head,
+        ...data.reduce((acc, element, ii) => {
+          if (ii) acc.push('|');
+          acc.push(element.substring(i, i + length).padEnd(length));
+          return acc;
+        }, [])
+      );
+    }
+  };
+}
+
+function bufferToString(buffer) {
+  let str = '';
+
+  for (let i = 0; i < buffer.length; i++) {
+    const value = buffer[i];
+    str +=
+      (value >= 0x20 && value <= 0x7e) || (value >= 0xa0 && value <= 0xff)
+        ? String.fromCharCode(value)
+        : '.';
+  }
+
+  return str;
+}
 
 const argv = require('yargs')
   .option('debug', {
@@ -13,7 +44,7 @@ const argv = require('yargs')
       })
       .option('protocol', {
         alias: 'p',
-        describe: 'Procotol (ws or spj)',
+        describe: 'Procotol (ws or pj)',
         default: 'ws',
       })
       .option('port', {
@@ -28,6 +59,8 @@ const argv = require('yargs')
   })
   .help()
   .demandCommand(1, '').argv;
+
+const print = printer();
 
 async function main(args) {
   const [cmd] = argv._;
@@ -96,15 +129,18 @@ async function main(args) {
 
       if (argv.debug) {
         guest.on('message', ({ origin, message: msg }) => {
+          const parsed = parse(msg);
+          if (parsed && parsed.type === 'ping') return;
           switch (origin) {
             case 'game':
-              console.log('<-', msg.toString('hex'));
+              print('<-', msg.toString('hex'), bufferToString(msg));
               break;
 
             case 'socket':
-              console.log('->', msg.toString('hex'));
+              print('->', msg.toString('hex'), bufferToString(msg));
               break;
           }
+          if (parsed) console.log(JSON.stringify(parsed));
         });
       }
       break;

@@ -85,7 +85,9 @@ ipcMain.on(RemoveGuest, (event, key) => {
   connection.close();
   Connections.delete(connection);
   CurrentState.state.push(`Removed: ${connection.remoteAddress}`);
-  CurrentState.connections = CurrentState.connections.filter(c => c.key !== key);
+  CurrentState.connections = CurrentState.connections.filter(
+    c => c.key !== key
+  );
   event.reply(GetAppState, CurrentState);
 });
 
