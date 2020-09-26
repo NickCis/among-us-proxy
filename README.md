@@ -94,5 +94,5 @@ $ npm run format
 Packaging:
 
 ```
-$ npm run lerna -- make
+$ npm run lerna -- run make
 ```
