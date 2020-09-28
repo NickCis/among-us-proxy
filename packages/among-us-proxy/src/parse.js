@@ -75,59 +75,66 @@ function parse(buffer) {
           for (let i = 10; i < buffer.length; ) {
             const read = getLengthedBuffer(buffer, i);
 
-            if (read.head !== 0x0002)
+            if (read.head === 0x0002) {
+              // const user = buffer[read.start];
+              const opt = buffer[read.start + 1];
+              switch (opt) {
+                case 0x1e:
+                  if (!acc) acc = {};
+
+                  // Player info
+                  acc.type = 'player-look';
+
+                  const start = read.start + 5;
+                  const name = (acc.name = getLengthedString(buffer, start));
+                  acc.color = Colors[buffer[start + 1 + name.length]];
+                  acc.hat = buffer[start + 1 + name.length + 1];
+                  acc.pet = buffer[start + 1 + name.length + 2];
+                  acc.skin = buffer[start + 1 + name.length + 3];
+
+                  break;
+
+                case 0x08:
+                  // Player id
+                  if (!acc) acc = {};
+                  acc.user = buffer[read.start];
+                  break;
+
+                case 0x09:
+                  // hat change
+                  if (!acc) acc = {};
+                  acc.type = 'hat-change';
+                  acc.user = buffer[read.start];
+                  acc.hat = buffer[read.start + 2];
+                  break;
+
+                case 0x0a:
+                  // skin change
+                  if (!acc) acc = {};
+                  acc.type = 'skin-change';
+                  acc.user = buffer[read.start];
+                  acc.skin = buffer[read.start + 2];
+                  break;
+
+                case 0x0d:
+                  // Player message
+                  if (!acc) acc = {};
+                  acc.user = buffer[read.start];
+                  acc.message = getLengthedString(buffer, read.start + 2);
+                  break;
+
+                default:
+                  console.error('Unknown opt:', opt.toString(16));
+                  break;
+              }
+            } else if (read.head === 0x0004) {
+              // TODO: parse more info
+              return {
+                type: 'player-init',
+                user: buffer[read.start + 4],
+              };
+            } else {
               return new Error(`unknown head: 0x${read.head.toString(16)}`);
-
-            // const user = buffer[read.start];
-            const opt = buffer[read.start + 1];
-            switch (opt) {
-              case 0x1e:
-                if (!acc) acc = {};
-
-                // Player info
-                acc.type = 'player-look';
-
-                const start = read.start + 5;
-                const name = (acc.name = getLengthedString(buffer, start));
-                acc.color = Colors[buffer[start + 1 + name.length]];
-                acc.hat = buffer[start + 1 + name.length + 1];
-                acc.pet = buffer[start + 1 + name.length + 2];
-                acc.skin = buffer[start + 1 + name.length + 3];
-
-                break;
-
-              case 0x08:
-                // Player id
-                if (!acc) acc = {};
-                acc.user = buffer[read.start];
-                break;
-
-              case 0x09:
-                // hat change
-                if (!acc) acc = {};
-                acc.type = 'hat-change';
-                acc.user = buffer[read.start];
-                acc.skin = buffer[read.start + 2];
-                break;
-
-              case 0x0a:
-                // skin change
-                if (!acc) acc = {};
-                acc.type = 'skin-change';
-                acc.user = buffer[read.start];
-                acc.skin = buffer[read.start + 2];
-                break;
-
-              case 0x0d:
-                // Player message
-                if (!acc) acc = {};
-                acc.user = buffer[read.start];
-                acc.message = getLengthedString(buffer, read.start + 2);
-                break;
-
-              default:
-                console.error('Unknown opt:', opt.toString(16));
-                break;
             }
 
             i = read.end;
@@ -137,24 +144,72 @@ function parse(buffer) {
         }
 
         case 0x0006: {
-          if (buffer[6] !== 0x20) break;
-          const subcode = buffer.readUInt32BE(7);
+          const pre = buffer.readUInt32BE(6);
+          if (pre !== 0x20000000)
+            return new Error(`unknown init: 0x${pre.toString(16)}`);
+          const subcode = buffer[10];
 
-          if (subcode !== 0x0e) break;
+          if (subcode === 0x0e) {
+            // Change player color
+            const user = buffer[14];
+            const color = Colors[buffer[16]];
 
-          // Change player color
-          const user = buffer[14];
-          const color = Colors[buffer[16]];
+            return {
+              type: 'player-color',
+              color,
+              user,
+            };
+          } else if (subcode === 0x1b) {
+            // player init
+            const read = getLengthedBuffer(buffer, 11);
+            if (read.head !== 0x0002)
+              return new Error(`unknown head: 0x${read.head.toString(16)}`);
 
+            const data = {
+              user: buffer[read.start],
+            };
+            const subsubcode = buffer[read.start + 1];
+
+            switch (subsubcode) {
+              case 0x05:
+                // name
+                data.type = 'player-name';
+                data.name = getLengthedString(buffer, read.start + 2);
+                break;
+
+              case 0x07:
+                // color
+                data.type = 'player-color';
+                data.color = Colors[buffer[read.start + 2]];
+                break;
+
+              default:
+                return new Error(
+                  `unknown subsubcode: ${subsubcode.toString(16)}`
+                );
+            }
+
+            return data;
+          }
+
+          return new Error('unknown t = 0x0006 message');
+        }
+
+        case 0x0007: {
+          const pre = buffer.readUInt32BE(6);
+          if (pre !== 0x20000000)
+            return new Error(`unknown init: 0x${pre.toString(16)}`);
+
+          // ack
           return {
-            type: 'player-color',
-            color,
-            user,
+            type: 'ack',
+            count,
+            number: buffer[10],
+            users: buffer[18],
           };
         }
 
         case 0x0001:
-        case 0x0007:
         default:
           return new Error(`implement t: ${t}`);
       }
@@ -199,5 +254,7 @@ function parse(buffer) {
 
   return undefined;
 }
+
+parse.Colors = Colors;
 
 module.exports = parse;
