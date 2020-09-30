@@ -120,7 +120,8 @@ async function main() {
     0x65, // e
   ]));
 
-  const init = await waitMessage('player-init');
+  const [init, player] = await Promise.all([waitMessage('player-init'), waitMessage('player')]);
+  const playerCode = player.parsed.msgs.filter(m => 'code' in m)[0].code;
 
   await send(Buffer.from([
     0x01,
@@ -133,7 +134,7 @@ async function main() {
     0x00,
     0x00,
     0x00,
-    0x1b, // code
+    playerCode, // code
     1 + 1 + name.length, // length not counting 0x00 02
     0x00,
     0x02,
@@ -156,13 +157,13 @@ async function main() {
     0x00,
     0x00,
     0x00,
-    0x1b, // code
+    playerCode, // code
     0x03, // length not counting 0x00 02
     0x00,
     0x02,
     init.parsed.user, // player id
     0x07,
-    0x03, // color
+    0x05, // color
   ]));
 
   // --- Handshake finished ----
@@ -194,13 +195,13 @@ async function main() {
     0x02,
     init.parsed.user,
     0x09,
-    0x36, // hat
+    0x35, // hat
     0x03, // length
     0x00,
     0x02,
     init.parsed.user,
     0x0a,
-    0x05, // skin
+    0x00, // skin
   ]));
 }
 

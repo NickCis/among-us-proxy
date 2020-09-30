@@ -10,7 +10,7 @@ const Colors = {
   8: 'purple',
   9: 'brown',
   10: 'cyan',
-  11: 'light-green',
+  11: 'lime',
 };
 
 function getLengthedString(buffer, offset) {
@@ -54,14 +54,14 @@ function parse(buffer) {
 
     case 0x01: {
       const count = buffer.readUInt16BE(1);
-      const length = buffer[3];
       // idk why 6
-      if (buffer.length - 6 - length !== 0)
+      const length = buffer[4] * 256 + buffer[3] + 6;
+      if (buffer.length !== length)
         return new Error(
           `Invalid buffer. blength: ${buffer.length} length: ${length}`
         );
 
-      const t = buffer.readUInt16BE(4);
+      const t = buffer[5];
 
       switch (t) {
         case 0x0005: {
@@ -147,6 +147,86 @@ function parse(buffer) {
           const pre = buffer.readUInt32BE(6);
           if (pre !== 0x20000000)
             return new Error(`unknown init: 0x${pre.toString(16)}`);
+
+          const msgs = [];
+          const number = buffer[10];
+
+          for (let i = 11; i < buffer.length; ) {
+            const read = getLengthedBuffer(buffer, i);
+            if (read.head === 0x0002) {
+              const data = {
+                number,
+                user: buffer[read.start],
+              };
+              const subsubcode = buffer[read.start + 1];
+
+              switch (subsubcode) {
+                case 0x05:
+                  // name
+                  data.type = 'player-name';
+                  data.name = getLengthedString(buffer, read.start + 2);
+                  break;
+
+                case 0x07:
+                  // color
+                  data.type = 'player-color';
+                  data.color = Colors[buffer[read.start + 2]];
+                  break;
+
+                default:
+                  data.error = new Error(
+                    `unknown subsubcode: ${subsubcode.toString(16)}`
+                  );
+                  break;
+              }
+              msgs.push(data);
+            } else if (read.head === 0x0004) {
+              const op = buffer[read.start];
+
+              switch (op) {
+                case 0x02:
+                  // TODO:
+                  break;
+                case 0x03: {
+                  // TODO: Player information
+                  let index = read.start + 12;
+                  const users = buffer[index++];
+                  for (let i = 0; i < users; i++) {
+                    const name = getLengthedString(buffer, index + 1);
+                    index += 1 + 1 + name.length;
+                    msgs.push({
+                      type: 'user',
+                      name,
+                      color: Colors[buffer[index++]],
+                      hat: buffer[index++],
+                      skin: buffer[index++],
+                      pet: buffer[index++],
+                    });
+                    index += 2;
+                  }
+                  break;
+                }
+
+                case 0x04:
+                  msgs.push({ code: buffer[read.start + 1] });
+                  break;
+
+                default:
+                  msgs.push(new Error(`unknown head: 0x${op.toString(16)}`));
+                  break;
+              }
+            } else {
+              // return new Error(`unknown head: 0x${read.head.toString(16)}`);
+              msgs.push(new Error(`unknown head: 0x${read.head.toString(16)}`));
+            }
+            i = read.end;
+          }
+
+          return {
+            type: 'player',
+            msgs,
+          };
+
           const subcode = buffer[10];
 
           if (subcode === 0x0e) {
@@ -192,7 +272,7 @@ function parse(buffer) {
             return data;
           }
 
-          return new Error('unknown t = 0x0006 message');
+          return new Error(`unknown t = 0x0006 message subcode = ${subcode}`);
         }
 
         case 0x0007: {
