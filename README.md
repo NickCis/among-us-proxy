@@ -1,14 +1,14 @@
 # Among Us Proxy
 
-The idea of this is to create a proxy to play among us without the need of the multiplayer server. Among Us is a great game, but many times the multiplayer server are full which creates long queues while trying to play. This project tries to build a bridge, using Web Sockets, in order to use the local LAN protocol.
+The idea of this is to create a proxy to play Among Us without the need of the multiplayer server. Among Us is a great game, but many times the multiplayer server are full which creates long queues while we are trying to play. This project tries to build a bridge, using Web Sockets, in order to use the local LAN protocol.
 
 ## How does this work?
 
 When a local match is created, the among us local Host broadcast a discovery message to the port `47777`.
 
-Guests are listening to this port on the local network. When a Guest connects to the Host, it sends udp packets to the port `22023` of the Host's ip.
+Guests are listening to this port on the local network. When a Guest connects to the Host, it sends udp packets to the port `22023` of the Host's IP.
 
-Then, the Host uses the ip and port of the received message in order to communicate with each Guest. All the communication is done over udp.
+Then, the Host uses the IP and port of the received message in order to communicate with each Guest. All the communication is done over udp.
 
 This project aims to be fill the gap (using WebSockets) of this udp communication over internet.
 
