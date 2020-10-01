@@ -7,6 +7,7 @@
   "license": "MIT",
   "repository": "https://github.com/nickcis/among-us-proxy",
   "scripts": {
+    "test": "jest",
     "format": "prettier --write 'src/**/*.js'",
     "make": "npm run package && zip -j dist/among-us-proxy-`node -e 'console.log(require(\"./package.json\").version)'`.zip dist/among-us-proxy.exe",
     "package": "nexe src/index.js -t windows-12.9.1 -o dist/among-us-proxy.exe"
@@ -16,6 +17,7 @@
     "README.md"
   ],
   "dependencies": {
+    "jest": "^26.4.2",
     "node-fetch": "^2.6.0",
     "simple-peerjs": "^1.0.1",
     "wrtc": "^0.4.6",
