@@ -111,4 +111,32 @@ describe('01', () => {
       });
     });
   });
+
+  it('map settings', () => {
+    const msg = message([
+      '01 00 08 36 00 05 20 00 00 00 2f 00 02 04 02 2c 03 0a 02 00 00 00 01 00 00',
+      '80 3f 00 00 80 3f 00 00 c0 3f 00 00 34 42 01 01 02 01 00 00 00 01 01 0f 00',
+      '00 00 78 00 00 00 01 00 01 01',
+    ]);
+
+    expect(msg).toEqual({
+      type: 'map-settings',
+      map: 'MIRA HQ',
+      playerSpeed: 1,
+      crewmateVision: 1,
+      impostorVision: 1.5,
+      killCooldown: 45,
+      commonTasks: 1,
+      longTasks: 1,
+      shortTasks: 2,
+      emergencyMeetings: 1,
+      impostors: 1,
+      killDistance: 1,
+      discussionTime: 15,
+      votingTime: 120,
+      emergencyCooldown: 0,
+      confirm: 1,
+      visualTasks: 1,
+    });
+  });
 });

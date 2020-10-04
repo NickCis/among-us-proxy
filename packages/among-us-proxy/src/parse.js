@@ -13,6 +13,12 @@ const Colors = {
   11: 'lime',
 };
 
+const Maps = {
+  0: 'The Skeld',
+  1: 'MIRA HQ',
+  2: 'Polus',
+};
+
 function getLengthedString(buffer, offset) {
   const length = buffer[offset];
   let text = '';
@@ -25,9 +31,9 @@ function getLengthedString(buffer, offset) {
 }
 
 function getLengthedBuffer(buffer, offset) {
-  const length = buffer[offset];
-  const head = buffer.readUInt16BE(offset + 1);
-  const start = offset + 1 + 2;
+  const length = buffer.readUInt16LE(offset);
+  const head = buffer[offset + 2];
+  const start = offset + 2 + 1;
   const end = start + length;
 
   return {
@@ -36,6 +42,15 @@ function getLengthedBuffer(buffer, offset) {
     start,
     end,
   };
+}
+
+function get16Float(buffer, offset) {
+  const data = buffer.readUInt16LE(offset);
+  const upper = (~data & 0x800) >> 7;
+  const exp = upper + ((data & 0x0780) >> 7);
+  const man = (data & 0x7f) << 3;
+
+  return (1 + man / 1024) * Math.pow(2, exp - 15);
 }
 
 function parse(buffer) {
@@ -55,7 +70,7 @@ function parse(buffer) {
     case 0x01: {
       const count = buffer.readUInt16BE(1);
       // idk why 6
-      const length = buffer[4] * 256 + buffer[3] + 6;
+      const length = buffer.readUInt16LE(3) + 6;
       if (buffer.length !== length)
         return new Error(
           `Invalid buffer. blength: ${buffer.length} length: ${length}`
@@ -75,23 +90,30 @@ function parse(buffer) {
           for (let i = 10; i < buffer.length; ) {
             const read = getLengthedBuffer(buffer, i);
 
-            if (read.head === 0x0002) {
+            if (read.head === 0x02) {
               // const user = buffer[read.start];
               const opt = buffer[read.start + 1];
               switch (opt) {
-                case 0x1e:
+                case 0x02:
+                  // Map settings
                   if (!acc) acc = {};
-
-                  // Player info
-                  acc.type = 'player-look';
-
-                  const start = read.start + 5;
-                  const name = (acc.name = getLengthedString(buffer, start));
-                  acc.color = Colors[buffer[start + 1 + name.length]];
-                  acc.hat = buffer[start + 1 + name.length + 1];
-                  acc.pet = buffer[start + 1 + name.length + 2];
-                  acc.skin = buffer[start + 1 + name.length + 3];
-
+                  acc.type = 'map-settings';
+                  acc.map = Maps[buffer[read.start + 9]];
+                  acc.playerSpeed = get16Float(buffer, read.start + 12);
+                  acc.crewmateVision = get16Float(buffer, read.start + 16);
+                  acc.impostorVision = get16Float(buffer, read.start + 20);
+                  acc.killCooldown = get16Float(buffer, read.start + 24);
+                  acc.commonTasks = buffer[read.start + 26];
+                  acc.longTasks = buffer[read.start + 27];
+                  acc.shortTasks = buffer[read.start + 28];
+                  acc.emergencyMeetings = buffer[read.start + 29];
+                  acc.impostors = buffer[read.start + 33];
+                  acc.killDistance = buffer[read.start + 34];
+                  acc.discussionTime = buffer[read.start + 35];
+                  acc.votingTime = buffer[read.start + 39];
+                  acc.emergencyCooldown = buffer[read.start + 44];
+                  acc.confirm = buffer[read.start + 45];
+                  acc.visualTasks = buffer[read.start + 46];
                   break;
 
                 case 0x08:
@@ -121,6 +143,21 @@ function parse(buffer) {
                   if (!acc) acc = {};
                   acc.user = buffer[read.start];
                   acc.message = getLengthedString(buffer, read.start + 2);
+                  break;
+
+                case 0x1e:
+                  if (!acc) acc = {};
+
+                  // Player info
+                  acc.type = 'player-look';
+
+                  const start = read.start + 5;
+                  const name = (acc.name = getLengthedString(buffer, start));
+                  acc.color = Colors[buffer[start + 1 + name.length]];
+                  acc.hat = buffer[start + 1 + name.length + 1];
+                  acc.pet = buffer[start + 1 + name.length + 2];
+                  acc.skin = buffer[start + 1 + name.length + 3];
+
                   break;
 
                 default:
