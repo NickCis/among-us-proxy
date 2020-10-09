@@ -4,7 +4,7 @@ const { AmongUs } = require('../constants');
 const { stringToHex } = require('../utils');
 
 class Server extends EventEmitter {
-  constructor(name = 'Proxy', ip = '127.0.0.1', usersInGame = 1) {
+  constructor(name = 'Proxy', ip = '255.255.255.255', usersInGame = 1) {
     super();
     this.name = name;
     this.ip = ip;
@@ -14,15 +14,9 @@ class Server extends EventEmitter {
 
     this.socket = new Promise(rs => {
       socket.bind(AmongUs.serverPort, () => {
-        let first = true;
+        rs(socket);
         socket.on('message', (msg, rinfo) => {
           this.rinfo = rinfo;
-
-          if (first) {
-            first = false;
-            rs(socket);
-          }
-
           this.emit('message', msg, rinfo);
         });
       });
@@ -39,12 +33,12 @@ class Server extends EventEmitter {
       'hex'
     );
 
+
     discovery.bind(() => {
-      // dicovery.setMulticastTTL(4);
+      discovery.setBroadcast(true);
       this.discoveryInterval = setInterval(() => {
-        // 192.168.1.255
         discovery.send(message, AmongUs.broadcastPort, this.ip);
-      }, 1000);
+      }, 500);
     });
   }
 

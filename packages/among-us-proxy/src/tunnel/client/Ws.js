@@ -17,8 +17,9 @@ class Ws extends EventEmitter {
 
       ws.once('open', () => {
         connected = true;
+        rs(this);
         ws.on('message', ev => {
-          this.emit('message', ev.data);
+          this.emit('message', ev);
         });
       });
 

@@ -79,7 +79,7 @@ function parse(buffer) {
       const t = buffer[5];
 
       switch (t) {
-        case 0x0005: {
+        case 0x05: {
           // XXX: Always? idk
           const pre = buffer.readUInt32BE(6);
           if (pre !== 0x20000000)
@@ -97,7 +97,7 @@ function parse(buffer) {
                 case 0x02:
                   // Map settings
                   if (!acc) acc = {};
-                  acc.type = 'map-settings';
+                  if (!acc.type) acc.type = 'map-settings';
                   acc.map = Maps[buffer[read.start + 9]];
                   acc.playerSpeed = get16Float(buffer, read.start + 12);
                   acc.crewmateVision = get16Float(buffer, read.start + 16);
@@ -149,7 +149,7 @@ function parse(buffer) {
                   if (!acc) acc = {};
 
                   // Player info
-                  acc.type = 'player-look';
+                  if (!acc.type) acc.type = 'player-look';
 
                   const start = read.start + 5;
                   const name = (acc.name = getLengthedString(buffer, start));
@@ -166,10 +166,9 @@ function parse(buffer) {
               }
             } else if (read.head === 0x0004) {
               // TODO: parse more info
-              return {
-                type: 'player-init',
-                user: buffer[read.start + 4],
-              };
+              if (!acc) acc = {};
+              acc.type = 'player-init';
+              acc.user = buffer[read.start + 4];
             } else {
               return new Error(`unknown head: 0x${read.head.toString(16)}`);
             }
@@ -180,7 +179,7 @@ function parse(buffer) {
           return acc;
         }
 
-        case 0x0006: {
+        case 0x06: {
           const pre = buffer.readUInt32BE(6);
           if (pre !== 0x20000000)
             return new Error(`unknown init: 0x${pre.toString(16)}`);
@@ -312,7 +311,7 @@ function parse(buffer) {
           return new Error(`unknown t = 0x0006 message subcode = ${subcode}`);
         }
 
-        case 0x0007: {
+        case 0x07: {
           const pre = buffer.readUInt32BE(6);
           if (pre !== 0x20000000)
             return new Error(`unknown init: 0x${pre.toString(16)}`);
