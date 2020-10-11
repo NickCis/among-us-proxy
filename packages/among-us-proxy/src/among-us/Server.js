@@ -33,7 +33,6 @@ class Server extends EventEmitter {
       'hex'
     );
 
-
     discovery.bind(() => {
       discovery.setBroadcast(true);
       this.discoveryInterval = setInterval(() => {

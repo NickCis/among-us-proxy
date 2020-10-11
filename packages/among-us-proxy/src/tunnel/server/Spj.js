@@ -2,7 +2,7 @@ const EventEmitter = require('events');
 const WebSocket = require('ws');
 const SimplePeerJs = require('simple-peerjs');
 const wrtc = require('wrtc');
-const fetch = require('node-fetch');
+const fetch = require('node-fetch').default;
 
 class Connection extends EventEmitter {
   constructor(conn, server) {
@@ -32,13 +32,13 @@ class Connection extends EventEmitter {
 }
 
 class Spj extends EventEmitter {
-  constructor(opts) {
+  constructor(opts = {}) {
     super();
     this.options = {
       fetch,
       WebSocket,
       wrtc,
-      ...opts,
+      ...opts.simplePeerJs,
     };
 
     const server = (this.server = new SimplePeerJs(this.options));

@@ -15,7 +15,7 @@ class Guest extends EventEmitter {
 
     client.on('error', e => this.emit('error', e));
 
-    client.on('message', async (msg) => {
+    client.on('message', async msg => {
       this.emit('message', { message: msg, origin: 'socket' });
       this.server.send(msg);
     });

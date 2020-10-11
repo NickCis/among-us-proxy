@@ -1,8 +1,17 @@
 import { ipcMain } from 'electron';
-import { Host, Guest } from 'among-us-proxy';
+import { Host, Guest, Discovery } from 'among-us-proxy';
 import fetch from 'node-fetch';
 import ngrok from 'ngrok';
-import { GetAppState, RunHost, RunGuest, Close, RemoveGuest } from '../methods';
+import {
+  GetAppState,
+  RunHost,
+  RunGuest,
+  Close,
+  RemoveGuest,
+  RunDiscovery,
+  StopDiscovery,
+  DiscoveredHost,
+} from '../methods';
 import ConnectionJar from './ConnectionJar';
 
 let CurrentState = { code: 'none' };
@@ -23,32 +32,50 @@ ipcMain.on(GetAppState, event => {
   event.reply(GetAppState, CurrentState);
 });
 
-ipcMain.on(RunHost, async event => {
+ipcMain.on(RunHost, async (event, config = {}) => {
   close();
   Connections = new ConnectionJar();
+
+  if (!config.protocol) config.protocol = 'ws';
+
+  if (!('ngrok' in config)) config.ngrok = true;
+
+  if (config.protocol !== 'ws') config.ngrok = false;
+
+  if (!('local' in config)) config.local = true;
+
+  if (config.local) config.host = '127.0.0.1';
+
   const port = 8080;
   const state = (CurrentState = {
     code: 'host',
-    state: [`Starting ngrok (${port})...`],
+    state: config.ngrok ? [`Starting ngrok (${port})...`] : [],
     connections: [],
   });
   event.reply(GetAppState, CurrentState);
 
-  const url = await ngrok.connect({
-    addr: port,
-    binPath: path => path.replace('app.asar', 'app.asar.unpacked'),
-  });
+  if (config.protocol === 'ws') state.url = `ws://<this ip>:${port}`;
 
-  state.url = url.replace(/^http/, 'ws');
-  state.state[0] = `${state.state[0]} ✅`;
-  state.state[1] = `Exposed URL: ${state.url}`;
-  state.state[2] = `Starting websocker server (${port})...`;
+  if (config.ngrok) {
+    const url = await ngrok.connect({
+      addr: port,
+      binPath: path => path.replace('app.asar', 'app.asar.unpacked'),
+    });
+
+    state.url = url.replace(/^http/, 'ws');
+    state.state[0] = `${state.state[0]} ✅`;
+    state.state.push(`Exposed URL: ${state.url}`);
+  }
+
+  state.state.push(`Starting server (${port})...`);
   event.reply(GetAppState, CurrentState);
 
-  const host = new Host('ws', { port });
+  const host = new Host(config.protocol, { port, ip: config.host });
 
-  host.on('listening', () => {
-    state.state[2] = `${state.state[2]} ✅`;
+  host.on('listening', id => {
+    if (id && config.protocol === 'pj') state.url = `pj://${id}`;
+
+    state.state[state.state.length - 1] = `${state.state[2]} ✅`;
     event.reply(GetAppState, CurrentState);
   });
 
@@ -74,7 +101,7 @@ ipcMain.on(RunHost, async event => {
 
   instance = {
     close: () => {
-      ngrok.kill();
+      if (config.ngrok) ngrok.kill();
       host.close();
     },
   };
@@ -123,6 +150,21 @@ ipcMain.on(RunGuest, async (event, host) => {
     state.error = error.toString();
     event.reply(GetAppState, CurrentState);
   });
+});
+
+ipcMain.on(RunDiscovery, event => {
+  close();
+  const discovery = (instance = new Discovery());
+
+  discovery.on('message', host => {
+    event.reply(DiscoveredHost, host);
+  });
+
+  discovery.listen();
+});
+
+ipcMain.on(StopDiscovery, () => {
+  if (instance instanceof Discovery) close();
 });
 
 ipcMain.on(Close, event => {

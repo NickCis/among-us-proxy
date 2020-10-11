@@ -14,7 +14,7 @@ class Host extends EventEmitter {
         this.emit('connection-error', { connection: conn, error })
       );
 
-      const client = new Client();
+      const client = new Client(opts.ip || '127.0.0.1');
 
       conn.on('message', msg => {
         this.emit('message', {
