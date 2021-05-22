@@ -10,7 +10,7 @@
     "test": "jest",
     "format": "prettier --write 'src/**/*.js'",
     "make": "npm run package && zip -j dist/among-us-proxy-`node -e 'console.log(require(\"./package.json\").version)'`.zip dist/among-us-proxy.exe",
-    "package": "nexe src/index.js -t windows-12.9.1 -o dist/among-us-proxy.exe"
+    "package": "nexe src/main.js -t windows-12.9.1 -o dist/among-us-proxy.exe"
   },
   "files": [
     "src/*",
